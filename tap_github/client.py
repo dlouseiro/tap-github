@@ -223,12 +223,9 @@ class GitHubRestStream(RESTStream):
                 time.sleep(60 + 30 * random.random())
                 raise RetriableAPIError(msg, response)
 
-            # The GitHub API randomly returns 401 Unauthorized errors, so we try again.
-            if (
-                response.status_code == 401
-                # if the token is invalid, we are also told about it
-                and not "bad credentials" in str(response.content).lower()
-            ):
+            # The GitHub API randomly returns 401 errors with either Unauthorized
+            # users or Bad credentials as a reason for the failure, so we try again.
+            if response.status_code == 401:
                 raise RetriableAPIError(msg, response)
 
             # all other errors are fatal
